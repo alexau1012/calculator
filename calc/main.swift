@@ -20,6 +20,7 @@ args.removeFirst() // remove the name of the program
 let calculator = Calculator();
 
 // Calculate the result
-let result = calculator.add(no1: 1, no2: 1);
+//let result = calculator.add(no1: 3, no2: 1);
+let result = calculator.calculate(args: ["5", "*", "4", "*", "2", "+", "2", "-", "4", "/", "2"])
 
 print(result)
