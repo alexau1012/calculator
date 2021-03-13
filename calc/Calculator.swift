@@ -8,10 +8,27 @@
 
 import Foundation
 
+struct ErrorInfo {
+    var input: String;
+    var argIndex: Int;
+}
+
+enum CalculatorError: Error {
+    case invalidInteger(errorInfo: ErrorInfo);
+    case invalidOperator(errorInfo: ErrorInfo);
+    case invalidDivision;
+};
+
 class Calculator {
     
     /// For multi-step calculation, it's helpful to persist existing result
-    var currentResult = 0;
+    var currentResult: Int = 0;
+    /// This array hold values that requires either addition or subtraction
+    var intermediateResults: [String] = [];
+    /// This array contains all supported operations
+    var supportedOperations: [String] = ["+", "-", "x", "/", "%"];
+    /// Store error information for throwing errors
+    var errorInfo: ErrorInfo = ErrorInfo(input: "", argIndex: -1);
     
     /// Perform Addition
     ///
@@ -35,18 +52,50 @@ class Calculator {
         return no1 * no2;
     }
     
-    func divide(no1: Int, no2: Int) -> Int {
+    func divide(no1: Int, no2: Int) throws -> Int {
+        try validateNonZeroValOnDivision(num: no2);
         return no1 / no2;
     }
     
-    func modulo(no1: Int, no2: Int) -> Int {
+    func modulus(no1: Int, no2: Int) -> Int {
         return no1 % no2;
     }
     
-    func calculate(args: [String]) -> String {
-        // Todo: Calculate Result from the arguments. Replace dummyResult with your actual result;
-        // This array should only hold addition and subtraction
-        var intermediateResults: [String] = [];
+    func validateValue(num: String, argIndex: Int) throws {
+        guard Int(num) != nil else {
+            errorInfo.input = num;
+            errorInfo.argIndex = argIndex;
+            throw CalculatorError.invalidInteger(errorInfo: errorInfo);
+        };
+    }
+    
+    func validateOperator(operatorSymbol: String, argIndex: Int) throws {
+        guard supportedOperations.contains(operatorSymbol) else {
+            errorInfo.input = operatorSymbol;
+            errorInfo.argIndex = argIndex;
+            throw CalculatorError.invalidOperator(errorInfo: errorInfo);
+        }
+    }
+    
+    func validateNonZeroValOnDivision(num: Int) throws {
+        guard num != 0 else {
+            throw CalculatorError.invalidDivision;
+        }
+    }
+    
+    func calculate(args: [String]) throws -> String {
+        // Calculate Result from the arguments.
+
+        for (index, element) in args.enumerated() {
+            if index % 2 == 0 {
+                try validateValue(num: element, argIndex: index);
+            } else {
+                try validateOperator(operatorSymbol: element, argIndex: index);
+            }
+        }
+
+        // This flag is true when an operation is performed so that processed values
+        // are not calculated again
         var skipNextVal: Bool = false;
         
         for (index, element) in args.enumerated() {
@@ -57,7 +106,7 @@ class Calculator {
             
             var lastValue: String;
             switch element {
-            case "*":
+            case "x":
                 lastValue = intermediateResults.removeLast();
                 intermediateResults.append(
                     String(multiply(no1: Int(lastValue)!, no2: Int(args[index+1])!)));
@@ -66,13 +115,13 @@ class Calculator {
             case "/":
                 lastValue = intermediateResults.removeLast();
                 intermediateResults.append(
-                    String(divide(no1: Int(lastValue)!, no2: Int(args[index+1])!)));
+                    String(try divide(no1: Int(lastValue)!, no2: Int(args[index+1])!)));
                 skipNextVal = true;
                 break;
             case "%":
                 lastValue = intermediateResults.removeLast();
                 intermediateResults.append(
-                    String(modulo(no1: Int(lastValue)!, no2: Int(args[index+1])!)));
+                    String(modulus(no1: Int(lastValue)!, no2: Int(args[index+1])!)));
                 skipNextVal = true;
                 break;
             default:
@@ -81,23 +130,23 @@ class Calculator {
             }
         }
             
-        print(intermediateResults);
+//        print(intermediateResults);
         
-        var result: Int = Int(intermediateResults[0])!;
+        currentResult = Int(intermediateResults[0])!;
         
         for (index, element) in intermediateResults.enumerated() {
             switch element {
             case "+":
-                result = add(no1: result, no2: Int(intermediateResults[index+1])!);
+                currentResult = add(no1: currentResult, no2: Int(intermediateResults[index+1])!);
                 break;
             case "-":
-                result = subtract(no1: result, no2: Int(intermediateResults[index+1])!);
+                currentResult = subtract(no1: currentResult, no2: Int(intermediateResults[index+1])!);
                 break;
             default:
                 break;
             }
         }
         
-        return(String(result))
+        return(String(currentResult))
     }
 }
