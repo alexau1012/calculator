@@ -31,5 +31,3 @@ do {
     print("Unexpected error \(error)")
     exit(4)
 }
-
-
