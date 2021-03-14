@@ -16,7 +16,7 @@ if args.count == 0 {
     print("Error: No arguments provided");
     exit(1);
 } else if args.count % 2 == 0 {
-    print("Error: Provided equation is not finished");
+    print("Error: Invalid equation");
     exit(2);
 }
 
