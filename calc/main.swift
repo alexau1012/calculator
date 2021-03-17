@@ -15,9 +15,8 @@ args.removeFirst() // remove the name of the program
 if args.count == 0 {
     print("Error: No arguments provided");
     exit(1);
-} else if args.count % 2 == 0 {
-    print("Error: Invalid equation");
-    exit(2);
+} else {
+    // do nothing
 }
 
 // Initialize a Calculator object
@@ -29,12 +28,15 @@ do {
     print(result)
 } catch CalculatorError.invalidInteger(let errorInfo) {
     print("Error: Provided value (\(errorInfo.input)) is not of type integer at argument position \(errorInfo.argIndex)");
-    exit(3)
+    exit(2)
 } catch CalculatorError.invalidOperator(let errorInfo) {
     print("Error: Provided operator (\(errorInfo.input)) is not supported at argument position \(errorInfo.argIndex)");
-    exit(4)
+    exit(3)
 } catch CalculatorError.invalidDivision {
     print("Error: Divide by zero is invalid");
+    exit(4)
+} catch CalculatorError.invalidEquationLength {
+    print("Error: Equation length is invalid");
     exit(5)
 } catch {
     print("Unexpected error \(error)")

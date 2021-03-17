@@ -19,6 +19,7 @@ enum CalculatorError: Error {
     case invalidInteger(errorInfo: ErrorInfo);
     case invalidOperator(errorInfo: ErrorInfo);
     case invalidDivision;
+    case invalidEquationLength;
 };
 
 class Calculator {
@@ -77,6 +78,30 @@ class Calculator {
         return no1 % no2;
     }
     
+    /// Validate count of equation (must be  odd no. E.g. ["1", "+", "1"])
+    /// - Parameters:
+    ///   - count: number
+    /// - Returns: Void
+    func validateEquationLength(count: Int) throws {
+        guard count % 2 != 0 else {
+            throw CalculatorError.invalidEquationLength;
+        }
+    }
+    
+    /// Validate arguements conforms to the pattern of [ (Int), (supported operator), (Int), ... ]
+    /// - Parameters:
+    ///   - args: equation
+    /// - Returns: Void
+    func validateEquation(args: [String]) throws {
+        for (index, element) in args.enumerated() {
+            if index % 2 == 0 {
+                try validateValue(no: element, argIndex: index);
+            } else {
+                try validateOperator(operatorSymbol: element, argIndex: index);
+            }
+        }
+    }
+    
     /// Validate value can be cast to an integer
     /// - Parameters:
     ///   - no: number
@@ -110,20 +135,6 @@ class Calculator {
     func validateNonZeroValOnDivision(no: Int) throws {
         guard no != 0 else {
             throw CalculatorError.invalidDivision;
-        }
-    }
-    
-    /// Validate arguements conforms to the pattern of [ (Int), (supported operator), (Int), ... ]
-    /// - Parameters:
-    ///   - args: equation
-    /// - Returns: Void
-    func validateArguments(args: [String]) throws {
-        for (index, element) in args.enumerated() {
-            if index % 2 == 0 {
-                try validateValue(no: element, argIndex: index);
-            } else {
-                try validateOperator(operatorSymbol: element, argIndex: index);
-            }
         }
     }
     
@@ -199,14 +210,17 @@ class Calculator {
     /// - Returns: The final result
     func calculate(args: [String]) throws -> String {
         // Calculate finalResult from the arguments.
+        
+        // Ensure equation has a valid count - must be odd no (E.g. ["1", "+", "1"])
+        try validateEquationLength(count: args.count);
 
-        // Validate arguments to ensure they conform before calculation
-        try validateArguments(args: args);
+        // Validate equation values and operators before calculation
+        try validateEquation(args: args);
 
         // Perform multiplication, division and modulus operations
         let intermediateResult: [String] = try performHighPrecedenceCal(args: args);
         
-        // Perform addition and subtraction operations
+        // Perform addition and subtraction operations to calculate final result
         let finalResult = performLowPrecedenceCal(args: intermediateResult);
         
         return(String(finalResult))
