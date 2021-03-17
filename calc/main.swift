@@ -11,7 +11,7 @@ import Foundation
 var args = ProcessInfo.processInfo.arguments
 args.removeFirst() // remove the name of the program
 
-// Exit if there are no arguments or if argument count is invalid
+// Exit if there are no arguments
 if args.count == 0 {
     print("Error: No arguments provided");
     exit(1);
