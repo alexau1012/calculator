@@ -144,8 +144,8 @@ class Calculator {
     /// - Returns: The array with only addition and subtraction operations
     func performHighPrecedenceCal(args: [String]) throws -> [String] {
         var intermediateResult: [String] = [];
-        // This flag is true when an operation is performed so that processed values
-        // are not calculated again
+        // This flag is true right after an operation is performed
+        // so that processed values are not calculated again
         var skipNextVal: Bool = false;
         
         for (index, element) in args.enumerated() {
@@ -153,7 +153,8 @@ class Calculator {
                 skipNextVal = false;
                 continue;
             }
-            
+            // To store the last value of the array for calculation
+            // as it will be deleted
             var lastValue: String;
             switch element {
             case "x":
@@ -221,7 +222,7 @@ class Calculator {
         let intermediateResult: [String] = try performHighPrecedenceCal(args: args);
         
         // Perform addition and subtraction operations to calculate final result
-        let finalResult = performLowPrecedenceCal(args: intermediateResult);
+        let finalResult: Int = performLowPrecedenceCal(args: intermediateResult);
         
         return(String(finalResult))
     }
